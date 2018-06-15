@@ -96,3 +96,15 @@ variable "tags" {
   type    = "map"
   default = {}
 }
+
+variable "snapshot_window" {
+  type        = "string"
+  description = "Window in UTC during which Elasticache will make snapshots, given a non-zero retention period"
+  default     = "05:00-07:00"
+}
+
+variable "snapshot_retention_limit" {
+  type        = "string"
+  description = "Number of days to retain Redis snapshots (defaults to zero, disabling backup)"
+  default     = "0"
+}
