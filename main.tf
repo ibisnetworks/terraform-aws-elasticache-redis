@@ -20,7 +20,7 @@ resource "aws_elasticache_replication_group" "default" {
   maintenance_window            = "${var.maintenance_window}"
   notification_topic_arn        = "${var.notification_topic_arn}"
 
-  tags = "${module.label.tags}"
+  tags = "${var.tags}"
 }
 
 #

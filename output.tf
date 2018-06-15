@@ -3,7 +3,11 @@ output "id" {
 }
 
 output "security_group_id" {
-  value = "${join("", aws_security_group.default.*.id)}"
+  value = "${join(",", flatten(aws_elasticache_replication_group.default.*.security_group_ids))}"
+}
+
+output "primary_endpoint_address" {
+  value = ["${join(",", flatten(aws_elasticache_replication_group.default.*.primary_endpoint_address))}"]
 }
 
 output "port" {
