@@ -1,15 +1,3 @@
-# Define composite variables for resources
-module "label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.3.3"
-  enabled    = "${var.enabled}"
-  namespace  = "${var.namespace}"
-  name       = "${var.name}"
-  stage      = "${var.stage}"
-  delimiter  = "${var.delimiter}"
-  attributes = "${var.attributes}"
-  tags       = "${var.tags}"
-}
-
 resource "aws_elasticache_subnet_group" "default" {
   count      = "${var.enabled == "true" ? 1 : 0}"
   name       = "${format("%s-%s-sg", var.name, var.stage)}"
@@ -78,15 +66,4 @@ resource "aws_cloudwatch_metric_alarm" "cache_memory" {
 
   alarm_actions = ["${var.alarm_actions}"]
   depends_on    = ["aws_elasticache_replication_group.default"]
-}
-
-module "dns" {
-  source    = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.2.1"
-  enabled   = "${var.dns_enabled}"
-  namespace = "${var.namespace}"
-  name      = "${var.name}"
-  stage     = "${var.stage}"
-  ttl       = 60
-  zone_id   = "${var.zone_id}"
-  records   = ["${aws_elasticache_replication_group.default.*.primary_endpoint_address}"]
 }
