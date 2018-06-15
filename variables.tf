@@ -87,7 +87,9 @@ variable "availability_zones" {
   type = "list"
 }
 
-variable "zone_id" {}
+variable "zone_id" {
+  default = ""
+}
 
 variable "delimiter" {
   type    = "string"
