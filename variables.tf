@@ -7,6 +7,11 @@ variable "enabled" {
   default     = "true"
 }
 
+variable "dns_enabled" {
+  description = "Set to true to allow the module to create DNS resources for Redis (default false)"
+  default     = "false"
+}
+
 variable "stage" {
   default = "default"
 }
