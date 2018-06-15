@@ -7,11 +7,6 @@ variable "enabled" {
   default     = "true"
 }
 
-variable "dns_enabled" {
-  description = "Set to true to allow the module to create DNS resources for Redis (default false)"
-  default     = "false"
-}
-
 variable "stage" {
   default = "default"
 }
@@ -85,10 +80,6 @@ variable "automatic_failover" {
 
 variable "availability_zones" {
   type = "list"
-}
-
-variable "zone_id" {
-  default = ""
 }
 
 variable "delimiter" {

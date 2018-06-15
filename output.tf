@@ -9,7 +9,3 @@ output "security_group_id" {
 output "port" {
   value = "${var.port}"
 }
-
-output "host" {
-  value = "${module.dns.hostname}"
-}

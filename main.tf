@@ -10,55 +10,25 @@ module "label" {
   tags       = "${var.tags}"
 }
 
-#
-# Security Group Resources
-#
-resource "aws_security_group" "default" {
-  count  = "${var.enabled == "true" ? 1 : 0}"
-  vpc_id = "${var.vpc_id}"
-  name   = "${module.label.id}"
-
-  ingress {
-    from_port       = "${var.port}"              # Redis
-    to_port         = "${var.port}"
-    protocol        = "tcp"
-    security_groups = ["${var.security_groups}"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = "${module.label.tags}"
-}
-
 resource "aws_elasticache_subnet_group" "default" {
   count      = "${var.enabled == "true" ? 1 : 0}"
-  name       = "${module.label.id}"
+  name       = "${format("%s-%s-sg", var.name, var.stage)}"
   subnet_ids = ["${var.subnets}"]
 }
 
-resource "aws_elasticache_parameter_group" "default" {
-  count  = "${var.enabled == "true" ? 1 : 0}"
-  name   = "${module.label.id}"
-  family = "${var.family}"
-}
-
 resource "aws_elasticache_replication_group" "default" {
+  engine                        = "redis"
+  engine_version                = "${var.engine_version}"
   count                         = "${var.enabled == "true" ? 1 : 0}"
-  replication_group_id          = "${module.label.id}"
-  replication_group_description = "${module.label.id}"
+  replication_group_id          = "${format("%s-%s", var.name, var.stage)}"
+  replication_group_description = "${format("%s-%s Redis cluster", var.name, var.stage)}"
   node_type                     = "${var.instance_type}"
   number_cache_clusters         = "${var.cluster_size}"
   port                          = "${var.port}"
-  parameter_group_name          = "${aws_elasticache_parameter_group.default.name}"
   availability_zones            = ["${slice(var.availability_zones, 0, var.cluster_size)}"]
   automatic_failover_enabled    = "${var.automatic_failover}"
   subnet_group_name             = "${aws_elasticache_subnet_group.default.name}"
-  security_group_ids            = ["${aws_security_group.default.id}"]
+  security_group_ids            = ["${var.security_groups}"]
   maintenance_window            = "${var.maintenance_window}"
   notification_topic_arn        = "${var.notification_topic_arn}"
 
@@ -70,7 +40,7 @@ resource "aws_elasticache_replication_group" "default" {
 #
 resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
   count               = "${var.enabled == "true" ? 1 : 0}"
-  alarm_name          = "${module.label.id}-cpu-utilization"
+  alarm_name          = "${format("%s-%s", var.name, var.stage)}-cpu-utilization"
   alarm_description   = "Redis cluster CPU utilization"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
@@ -82,7 +52,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
   threshold = "${var.alarm_cpu_threshold_percent}"
 
   dimensions {
-    CacheClusterId = "${module.label.id}"
+    CacheClusterId = "${format("%s-%s", var.name, var.stage)}"
   }
 
   alarm_actions = ["${var.alarm_actions}"]
@@ -91,7 +61,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_cpu" {
 
 resource "aws_cloudwatch_metric_alarm" "cache_memory" {
   count               = "${var.enabled == "true" ? 1 : 0}"
-  alarm_name          = "${module.label.id}-freeable-memory"
+  alarm_name          = "${format("%s-%s", var.name, var.stage)}-freeable-memory"
   alarm_description   = "Redis cluster freeable memory"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = "1"
@@ -103,7 +73,7 @@ resource "aws_cloudwatch_metric_alarm" "cache_memory" {
   threshold = "${var.alarm_memory_threshold_bytes}"
 
   dimensions {
-    CacheClusterId = "${module.label.id}"
+    CacheClusterId = "${format("%s-%s", var.name, var.stage)}"
   }
 
   alarm_actions = ["${var.alarm_actions}"]
